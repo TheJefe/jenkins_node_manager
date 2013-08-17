@@ -5,14 +5,17 @@ require 'open-uri'
 require 'rexml/document'
 require 'timeout'
 
+
+#These are environment variables that are used to connect to masters API
 hostname=ENV['JENKINS_HOSTNAME']
 port=ENV['JENKINS_PORT']
 @username=ENV['JENKINS_USERNAME']
 @api_key=ENV['JENKINS_API_KEY']
 
 @main_url="http://#{hostname}:#{port}"
-@node_list_end_point= "/computer/api/json"
+@node_list_end_point= "/computer/api/json" ##endpoint to get a list of nodes
 
+# this method gets data from a specified endpoint and returns it as a string
 def http_get(end_point)
         uri= URI.parse "#{@main_url}#{end_point}"
         http = Net::HTTP.new(uri.host, uri.port)
@@ -30,6 +33,7 @@ def download_client_jar
         puts "download complete"
 end
 
+# this method is used to get the secret key for a node on the master so that it can authenticate
 def get_secret(node_name)
         puts "downloading slave-agent.jnlp..."
         jnlp= http_get("/computer/#{node_name}/slave-agent.jnlp")
@@ -37,6 +41,7 @@ def get_secret(node_name)
         doc.get_text('jnlp/application-desc/argument')
 end
 
+# this method will find the first  node name that is currently "offline" and return it.
 def find_available_node
         node_name=nil
         nodes = JSON.parse http_get(@node_list_end_point)
@@ -50,8 +55,11 @@ def find_available_node
         return node_name
 end
 
+#### MAIN ####
+
 download_client_jar
 
+## this will attempt to connect 5 times before giving up
 for i in 1..5
         node_name=find_available_node
 
@@ -66,8 +74,9 @@ for i in 1..5
         cmd = "java -jar slave.jar -jnlpUrl #{@main_url}/computer/#{node_name}/slave-agent.jnlp -secret #{secret} &"
         puts "starting jar file with: \n #{cmd}"
         fork{`#{cmd}`}
+        # If the process does not return within 10 seconds, we assume that it has connected, otherwise we look for another node name and try again
         begin
-                Timeout.timeout(10) do
+                Timeout.timeout(10) do 
                         Process.wait
                 end
         rescue Timeout::Error
