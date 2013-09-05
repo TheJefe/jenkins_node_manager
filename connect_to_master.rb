@@ -7,13 +7,20 @@ require 'timeout'
 
 
 #These are environment variables that are used to connect to masters API
-hostname=ENV['JENKINS_HOSTNAME']
-port=ENV['JENKINS_PORT']
+@hostname=ENV['JENKINS_HOSTNAME']
+@port=ENV['JENKINS_PORT']
 @username=ENV['JENKINS_USERNAME']
 @api_key=ENV['JENKINS_API_KEY']
 
-@main_url="http://#{hostname}:#{port}"
+@main_url="http://#{@hostname}:#{@port}"
 @node_list_end_point= "/computer/api/json" ##endpoint to get a list of nodes
+
+# Checks that the necessary environment variables are set
+def check_environment
+        if @hostname == nil || @port == nil || @username == nil || @api_key == nil
+                raise "environment variables not set. Please check that you have the following set...\nJENKINS_HOSTNAME\nJENKINS_PORT\nJENKINS_USERNAME\nJENKINS_API_KEY"
+        end
+end
 
 # this method gets data from a specified endpoint and returns it as a string
 def http_get(end_point)
@@ -57,6 +64,7 @@ end
 
 #### MAIN ####
 
+check_environment
 download_client_jar
 
 ## this will attempt to connect 5 times before giving up
