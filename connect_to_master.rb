@@ -69,7 +69,8 @@ download_client_jar
 
 ## this will attempt to connect 5 times before giving up
 for i in 1..5
-        node_name=find_available_node
+        node_name= ARGV.empty? ? find_available_node : ARGV[0]
+        puts node_name
 
         if node_name.nil? || !defined? node_name
                 raise "no offline nodes found. goto #{@main_url} to create a new one"

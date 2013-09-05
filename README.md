@@ -12,8 +12,12 @@ Jenkins Slave Connector is a simple ruby script that can be used to connect a je
         JENKINS_USERNAME
         JENKINS_API_KEY
         
-3. Run the connection script from th slave.
+3. Run the connection script from the slave.
+
         ruby connect_to_master.rb
 
+You can also specify a node name to try to connect to...
+
+        ruby connect_to_master.rb node12
 
 * Recommended use: * Have a startup script on your jenkinsslave that will execute setting environment variables, cloneing this repo, and executing this script.
