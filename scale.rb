@@ -1,7 +1,6 @@
 require 'net/http'
 require 'json'
 require 'uri'
-require 'pry'
 
 @hostname=ENV['JENKINS_HOSTNAME']
 @port=ENV['JENKINS_PORT']
@@ -90,7 +89,6 @@ def scale_nodes()
 
         end
 
-        binding.pry
         if scale_by > 0
                 add_nodes scale_by
         else
