@@ -1,13 +1,14 @@
 require 'net/http'
 require 'json'
 require 'uri'
+require 'pry'
 
 @hostname=ENV['JENKINS_HOSTNAME']
 @port=ENV['JENKINS_PORT']
 @username=ENV['JENKINS_USERNAME']
 @api_key=ENV['JENKINS_API_KEY']
 
-@MIN_COMPUTERS=9 #one blank one for master and another for the template node
+@MIN_COMPUTERS=7 #one blank one for master and another for the template node
 @MAX_COMPUTERS=20
 
 @main_url="http://#{@hostname}:#{@port}"
@@ -48,14 +49,6 @@ def check_environment
         end
 end
 
-def count_executors(json)
-        num = 0
-        json["computer"].each do |computer|
-                num += computer["numExecutors"]
-        end
-      return num
-end
-
 def add_nodes(num)
                 puts "adding #{num} nodes"
         num.times do
@@ -75,7 +68,7 @@ def scale_nodes()
         node_info   = JSON.parse( http_get(@node_list_endpoint) )
         build_queue = JSON.parse( http_get(@build_queue_endpoint) )
         num_queued = build_queue["items"].count
-        total_executors = count_executors(node_info)
+        total_executors = node_info["totalExecutors"]
         busy_nodes = node_info["busyExecutors"]
         difference = total_executors - busy_nodes
         scale_by = 0
@@ -97,6 +90,7 @@ def scale_nodes()
 
         end
 
+        binding.pry
         if scale_by > 0
                 add_nodes scale_by
         else
