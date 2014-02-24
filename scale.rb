@@ -7,8 +7,8 @@ require 'uri'
 @username=ENV['JENKINS_USERNAME']
 @api_key=ENV['JENKINS_API_KEY']
 
-@MIN_COMPUTERS=8 #one blank one for master and another for the template node
-@MAX_COMPUTERS=20
+@MIN_COMPUTERS=13 #one blank one for master and another for the template node
+@MAX_COMPUTERS=35
 
 @main_url="http://#{@hostname}:#{@port}"
 
