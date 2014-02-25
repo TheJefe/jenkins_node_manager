@@ -9,8 +9,8 @@ PORT=ENV['JENKINS_PORT']
 USERNAME=ENV['JENKINS_USERNAME']
 API_KEY=ENV['JENKINS_API_KEY']
 
-MIN_NODES=ENV['MIN_NODES']
-MAX_NODES=ENV['MAX_NODES']
+MIN_NODES=ENV['MIN_NODES'].to_i
+MAX_NODES=ENV['MAX_NODES'].to_i
 
 MAIN_URL="http://#{HOSTNAME}:#{PORT}"
 
@@ -70,8 +70,14 @@ def scale_nodes()
   node_info   = JSON.parse( http_get(NODE_LIST_ENDPOINT) )
   build_queue = JSON.parse( http_get(BUILD_QUEUE_ENDPOINT) )
   num_queued = build_queue["items"].count
-  total_executors = node_info["totalExecutors"]
-  busy_nodes = node_info["busyExecutors"]
+  master_node = node_info["computer"].select {|x| x['displayName'] == "master"}.first
+  master_executors = master_node["numExecutors"]
+  total_executors = node_info["totalExecutors"] - master_executors
+  # ugh, can't get a number of non master busy executors... so we will assume that 
+  # the master executors are always busy and do our best
+  busy_nodes = node_info["busyExecutors"] - master_executors
+
+  busy_nodes = 0 unless busy_nodes > 0
   difference = total_executors - busy_nodes
   scale_by = 0
 
@@ -87,14 +93,16 @@ def scale_nodes()
     if ( (total_executors - difference) >= MIN_NODES )
       scale_by = -1 * difference
     else
-      scale_by = -1 * ( total_executors - MIN_NODES)
+      scale_by = -1 * ( total_executors - MIN_NODES )
     end
 
   end
 
   if scale_by > 0
+    puts "scale up by #{scale_by}"
     add_nodes scale_by
   else
+    puts "scale down by #{ -1 *scale_by}"
     delete_nodes(-1 * scale_by)
   end
 end
