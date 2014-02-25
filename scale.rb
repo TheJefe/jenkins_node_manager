@@ -7,8 +7,8 @@ require 'uri'
 @username=ENV['JENKINS_USERNAME']
 @api_key=ENV['JENKINS_API_KEY']
 
-@MIN_COMPUTERS=13 #one blank one for master and another for the template node
-@MAX_COMPUTERS=35
+@MIN_NODES=ENV['MIN_NODES']
+@MAX_NODES=ENV['MAX_NODES']
 
 @main_url="http://#{@hostname}:#{@port}"
 
@@ -43,9 +43,10 @@ end
 
 # checks to make sure the required environment variables are set
 def check_environment
-        if @hostname == nil || @port == nil || @username == nil || @api_key == nil
-                raise "environment variables not set. Please check that you have the following set...\nJENKINS_HOSTNAME\nJENKINS_PORT\nJENKINS_USERNAME\nJENKINS_API_KEY"
-        end
+  if @hostname == nil || @port == nil || @username == nil || @api_key == nil || @MIN_NODES == nil || @MAX_NODES == nil
+    raise "environment variables not set. Please check that you have the following set...\
+\nJENKINS_HOSTNAME\nJENKINS_PORT\nJENKINS_USERNAME\nJENKINS_API_KEY\nMIN_NODES\nMAX_NODES"
+  end
 end
 
 def add_nodes(num)
@@ -79,12 +80,12 @@ def scale_nodes()
 
         if num_queued > 0
                 # don't go over the max count
-                scale_by = (total_executors + num_queued) <= @MAX_COMPUTERS ? num_queued : @MAX_COMPUTERS - total_executors
+                scale_by = (total_executors + num_queued) <= @MAX_NODES ? num_queued : @MAX_NODES - total_executors
         else
-                if ( (total_executors - difference) >= @MIN_COMPUTERS )
+                if ( (total_executors - difference) >= @MIN_NODES )
                         scale_by = -1 * difference
                 else
-                        scale_by = -1 * ( total_executors - @MIN_COMPUTERS)
+                        scale_by = -1 * ( total_executors - @MIN_NODES)
                 end
 
         end
