@@ -45,7 +45,7 @@ end
 
 # checks to make sure the required environment variables are set
 def check_environment
-  if HOSTNAME == nil || PORT == nil || USERNAME == nil || API_KEY == nil || MIN_NODES == nil || MAX_NODES == nil
+  if HOSTNAME == nil || PORT == nil || USERNAME == nil || API_KEY == nil || MIN_NODES <= 0 || MAX_NODES <=0
     raise "environment variables not set. Please check that you have the following set...\
 \nJENKINS_HOSTNAME\nJENKINS_PORT\nJENKINS_USERNAME\nJENKINS_API_KEY\nMIN_NODES\nMAX_NODES"
   end
