@@ -49,6 +49,11 @@ def check_environment
     raise "environment variables not set. Please check that you have the following set...\
 \nJENKINS_HOSTNAME\nJENKINS_PORT\nJENKINS_USERNAME\nJENKINS_API_KEY\nMIN_NODES\nMAX_NODES"
   end
+
+  if ARGV[0] =~ /pretend/
+    puts "pretend flag detected"
+  end
+
 end
 
 def add_nodes(num)
@@ -89,21 +94,20 @@ def scale_nodes()
   if num_queued > 0
     # don't go over the max count
     scale_by = (total_executors + num_queued) <= MAX_NODES ? num_queued : MAX_NODES - total_executors
-  else
-    if ( (total_executors - difference) >= MIN_NODES )
+  else # scale down, but by how much?
+    if (total_executors - difference) >= MIN_NODES
       scale_by = -1 * difference
     else
       scale_by = -1 * ( total_executors - MIN_NODES )
     end
-
   end
 
   if scale_by > 0
     puts "scale up by #{scale_by}"
-    add_nodes scale_by
+    add_nodes scale_by unless ARGV[0] =~ /pretend/
   else
     puts "scale down by #{ -1 *scale_by}"
-    delete_nodes(-1 * scale_by)
+    delete_nodes(-1 * scale_by) unless ARGV[0] =~ /pretend/
   end
 end
 
