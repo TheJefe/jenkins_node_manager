@@ -91,7 +91,7 @@ def scale_nodes()
   puts "difference #{difference}"
   puts "queued jobs: #{num_queued}"
 
-  if num_queued > 0
+  if num_queued > 0 and num_queued > difference
     # don't go over the max count
     scale_by = (total_executors + num_queued) <= MAX_NODES ? num_queued : MAX_NODES - total_executors
   else # scale down, but by how much?
