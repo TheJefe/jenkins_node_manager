@@ -19,9 +19,14 @@ def check_environment
 
 end
 
+def clean_up_disconnected_nodes
+  node_info   = Jenkins.get_node_info
+  jenkins_node_list = node_info["computer"].select {|x| x['displayName'] != "master" }
+end
+
 def scale_nodes()
-  node_info   = JSON.parse( Jenkins.http_get(NODE_LIST_ENDPOINT) )
-  build_queue = JSON.parse( Jenkins.http_get(BUILD_QUEUE_ENDPOINT) )
+  node_info   = Jenkins.get_node_info
+  build_queue = Jenkins.get_build_queue
   num_queued = build_queue["items"].count
   master_node = node_info["computer"].select {|x| x['displayName'] == "master"}.first
   master_executors = master_node["numExecutors"]

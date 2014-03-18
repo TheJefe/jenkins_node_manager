@@ -2,6 +2,7 @@ require 'uri'
 require 'json'
 require 'open-uri'
 require 'rexml/document'
+require 'httparty'
 
 HOSTNAME=ENV['JENKINS_HOSTNAME']
 PORT=ENV['JENKINS_PORT']
@@ -37,6 +38,14 @@ class Jenkins
     end
 
     return node_name
+  end
+
+  def self.get_node_info
+    JSON.parse( http_get(NODE_LIST_ENDPOINT) )
+  end
+
+  def self.get_build_queue
+    JSON.parse( http_get(BUILD_QUEUE_ENDPOINT) )
   end
 
   def self.add_nodes(num)
