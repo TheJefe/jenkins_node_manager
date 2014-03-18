@@ -1,8 +1,6 @@
 #!/usr/bin/env ruby
 
-require 'net/http'
 require 'json'
-require 'uri'
 require '../lib/jenkins.rb'
 
 MIN_NODES=ENV['MIN_NODES'].to_i
