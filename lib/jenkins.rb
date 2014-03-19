@@ -11,7 +11,7 @@ API_KEY=ENV['JENKINS_API_KEY']
 MAIN_URL="http://#{HOSTNAME}:#{PORT}"
 NODE_LIST_ENDPOINT = "/computer/api/json" ##endpoint to get a list of nodes
 NODE_ADD_ENDPOINT = "/job/Node-add/buildWithParameters?NUM_NODES="
-NODE_DELETE_ENDPOINT = "/job/Node-delete/build??delay=0sec"
+NODE_DELETE_ENDPOINT = "/job/Node-delete/buildWithParameters"
 BUILD_QUEUE_ENDPOINT = "/queue/api/json"
 
 class Jenkins
