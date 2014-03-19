@@ -12,16 +12,19 @@ def check_environment
     raise "environment variables not set. Please check that you have the following set...\
 \nJENKINS_HOSTNAME\nJENKINS_PORT\nJENKINS_USERNAME\nJENKINS_API_KEY\nMIN_NODES\nMAX_NODES"
   end
-
-  if ARGV[0] =~ /pretend/
+  if ARGV.any?{ |s| s=~/pretend/ }
     puts "pretend flag detected"
   end
 
 end
 
 def clean_up_disconnected_nodes
-  node_info   = Jenkins.get_node_info
-  jenkins_node_list = node_info["computer"].select {|x| x['displayName'] != "master" }
+  jenkins_node_names   = Jenkins.get_node_names
+  jenkins_node_names  = jenkins_node_names.map(&:downcase)
+  other_nodes_list = ARGV[0].split ','
+  nodes_to_delete = other_nodes_list.reject{|x| jenkins_node_names.include? x}
+  puts "Nodes that will be deleted: #{nodes_to_delete}"
+  Jenkins.delete_nodes_by_name nodes_to_delete unless nodes_to_delete.empty?
 end
 
 def scale_nodes()
@@ -60,11 +63,13 @@ def scale_nodes()
     Jenkins.add_nodes scale_by unless ARGV[0] =~ /pretend/
   else
     puts "scale down by #{ -1 *scale_by}"
-    Jenkins.delete_nodes(-1 * scale_by) unless ARGV[0] =~ /pretend/
+    Jenkins.delete_nodes(-1 * scale_by) unless ARGV.any?{ |s| s=~/pretend/ }
   end
 end
 
 #### MAIN
 check_environment
+if ARGV.any?{ |s| s!=~/pretend/ }
+  clean_up_disconnected_nodes
+end
 scale_nodes
-

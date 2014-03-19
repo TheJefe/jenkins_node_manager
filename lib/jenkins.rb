@@ -44,6 +44,10 @@ class Jenkins
     JSON.parse( http_get(NODE_LIST_ENDPOINT) )
   end
 
+  def self.get_node_names
+    get_node_info["computer"].map{ |k,v| k['displayName'] }
+  end
+
   def self.get_build_queue
     JSON.parse( http_get(BUILD_QUEUE_ENDPOINT) )
   end
@@ -52,6 +56,14 @@ class Jenkins
     puts "adding #{num} nodes"
     num.times do
       http_get("#{NODE_ADD_ENDPOINT}#{num}")
+    end
+  end
+
+  def self.delete_nodes_by_name(names)
+    names.each do |name|
+      puts "deleting node named: #{name} "
+      http_get("#{NODE_DELETE_ENDPOINT}?NODE_NAME_TO_DELETE=#{name}")
+      sleep 5
     end
   end
 
@@ -71,12 +83,12 @@ class Jenkins
     puts "download complete"
   end
 
-# this method is used to get the secret key for a node on the master so that it can authenticate
-def self.get_secret(node_name)
-        puts "downloading slave-agent.jnlp..."
-        jnlp= http_get("/computer/#{node_name}/slave-agent.jnlp")
-        doc = REXML::Document.new(jnlp)
-        doc.get_text('jnlp/application-desc/argument')
-end
+  # this method is used to get the secret key for a node on the master so that it can authenticate
+  def self.get_secret(node_name)
+    puts "downloading slave-agent.jnlp..."
+    jnlp= http_get("/computer/#{node_name}/slave-agent.jnlp")
+    doc = REXML::Document.new(jnlp)
+    doc.get_text('jnlp/application-desc/argument')
+  end
 
 end
