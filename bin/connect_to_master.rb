@@ -1,5 +1,7 @@
+#!/usr/bin/env ruby
+
 require 'timeout'
-require '../lib/jenkins.rb'
+require File.expand_path("./../../lib/jenkins.rb", __FILE__)
 
 # Checks that the necessary environment variables are set
 def check_environment

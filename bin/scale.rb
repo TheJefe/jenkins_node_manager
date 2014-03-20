@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 
 require 'json'
-require '../lib/jenkins.rb'
+require File.expand_path("./../../lib/jenkins.rb", __FILE__)
 
 MIN_NODES=ENV['MIN_NODES'].to_i
 MAX_NODES=ENV['MAX_NODES'].to_i
