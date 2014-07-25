@@ -18,7 +18,8 @@ def check_environment
 
 end
 
-def clean_up_disconnected_nodes
+# Nodes that where passed in, that were not in the jenkins list of nodes should be shutdown
+def clean_up_disconnected_remote_servers
   jenkins_node_names   = Jenkins.get_node_names
   jenkins_node_names  = jenkins_node_names.map(&:downcase)
   other_nodes_list = ARGV[0].split ','
@@ -70,6 +71,7 @@ end
 #### MAIN
 check_environment
 if ARGV.any?{ |s| s!=~/pretend/ }
-  clean_up_disconnected_nodes
+  clean_up_disconnected_remote_servers
 end
+Jenkins.remove_disconnected_nodes
 scale_nodes

@@ -8,6 +8,7 @@ HOSTNAME=ENV['JENKINS_HOSTNAME']
 PORT=ENV['JENKINS_PORT']
 USERNAME=ENV['JENKINS_USERNAME']
 API_KEY=ENV['JENKINS_API_KEY']
+NODE_TEMPLATE_NAME="template"
 MAIN_URL="http://#{HOSTNAME}:#{PORT}"
 NODE_LIST_ENDPOINT = "/computer/api/json" ##endpoint to get a list of nodes
 NODE_ADD_ENDPOINT = "/job/Node-add/buildWithParameters?NUM_NODES="
@@ -73,6 +74,21 @@ class Jenkins
       http_get(NODE_DELETE_ENDPOINT)
       sleep 5
     end
+  end
+
+  # this method will delete a node from jenkins list, but should NOT be used to delete a connected node, because it could be in the middle of a job
+  def self.delete_nodes_from_jenkins!(names)
+    names.each do |name|
+      puts "deleting node named: #{name} from Jenkins"
+      http_get("/computer/#{name}/doDelete")
+    end
+  end
+
+  # Nodes in Jenkins list, that aren't connected, should be shutdown
+  def self.remove_disconnected_nodes
+    # get disconnected node names that are not the TEMPLATE node
+    names = get_node_info["computer"].reject{|k,v| !k['offline'] or k['displayName']==NODE_TEMPLATE_NAME}.map{|k,v| k['displayName']}
+    Jenkins.delete_nodes_from_jenkins!(names) unless names.empty?
   end
 
   def self.download_client_jar
