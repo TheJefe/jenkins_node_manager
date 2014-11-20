@@ -27,6 +27,15 @@ class Jenkins
     response.body
   end
 
+  def self.http_post(endpoint)
+    uri= URI.parse "#{MAIN_URL}#{endpoint}"
+    http = Net::HTTP.new(uri.host, uri.port)
+    request = Net::HTTP::Post.new(uri.request_uri)
+    request.basic_auth(USERNAME, API_KEY)
+    response = http.request(request)
+    response.body
+  end
+
   # this method will find the first  node name that is currently "offline" and return it.
   def self.find_available_node
     node_name=nil
@@ -56,14 +65,14 @@ class Jenkins
   def self.add_nodes(num)
     puts "adding #{num} nodes"
     num.times do
-      http_get("#{NODE_ADD_ENDPOINT}#{num}")
+      http_post("#{NODE_ADD_ENDPOINT}#{num}")
     end
   end
 
   def self.delete_nodes_by_name(names)
     names.each do |name|
       puts "deleting node named: #{name} "
-      http_get("#{NODE_DELETE_ENDPOINT}?NODE_NAME_TO_DELETE=#{name}")
+      http_post("#{NODE_DELETE_ENDPOINT}?NODE_NAME_TO_DELETE=#{name}")
       sleep 5
     end
   end
@@ -71,7 +80,7 @@ class Jenkins
   def self.delete_nodes(num)
     puts "deleting #{num} nodes"
     num.times do
-      http_get(NODE_DELETE_ENDPOINT)
+      http_post(NODE_DELETE_ENDPOINT)
       sleep 5
     end
   end
@@ -80,7 +89,7 @@ class Jenkins
   def self.delete_nodes_from_jenkins!(names)
     names.each do |name|
       puts "deleting node named: #{name} from Jenkins"
-      http_get("/computer/#{name}/doDelete")
+      http_post("/computer/#{name}/doDelete")
     end
   end
 
