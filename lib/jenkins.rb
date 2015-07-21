@@ -96,7 +96,9 @@ class Jenkins
   # Nodes in Jenkins list, that aren't connected, should be shutdown
   def self.remove_disconnected_nodes
     # get disconnected node names that are not the TEMPLATE node
-    names = get_node_info["computer"].reject{|k,v| !k['offline'] or k['displayName']==NODE_TEMPLATE_NAME}.map{|k,v| k['displayName']}
+    all_nodes = get_node_info["computer"]
+    filter_nodes = all_nodes.reject{|k,v| !k['offline'] or k['displayName'] == NODE_TEMPLATE_NAME}
+    names = filter_nodes.map {|k,v| k['displayName']}
     Jenkins.delete_nodes_from_jenkins!(names) unless names.empty?
   end
 
