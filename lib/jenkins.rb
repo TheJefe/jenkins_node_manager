@@ -85,7 +85,15 @@ class Jenkins
     end
   end
 
-  # this method will delete a node from jenkins list, but should NOT be used to delete a connected node, because it could be in the middle of a job
+  def self.toggle_node_offline(names)
+    names.each do |name|
+      http_post("/computer/#{name}/toggleOffline")
+    end
+  end
+
+  # this method will delete a node from jenkins list,
+  # but should NOT be used to delete a connected node,
+  # because it could be in the middle of a job
   def self.delete_nodes_from_jenkins!(names)
     names.each do |name|
       puts "deleting node named: #{name} from Jenkins"
