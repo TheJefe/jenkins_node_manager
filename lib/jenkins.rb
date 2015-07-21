@@ -9,6 +9,7 @@ PORT=ENV['JENKINS_PORT']
 USERNAME=ENV['JENKINS_USERNAME']
 API_KEY=ENV['JENKINS_API_KEY']
 NODE_TEMPLATE_NAME="template"
+DO_NOT_SCALE_NAME="donotscale"
 MAIN_URL="http://#{HOSTNAME}:#{PORT}"
 NODE_LIST_ENDPOINT = "/computer/api/json" ##endpoint to get a list of nodes
 NODE_ADD_ENDPOINT = "/job/Node-add/buildWithParameters?NUM_NODES="
@@ -54,6 +55,14 @@ class Jenkins
     JSON.parse( http_get(NODE_LIST_ENDPOINT) )
   end
 
+  def self.get_scalable_nodes
+    all_nodes = get_node_info["computer"]
+    all_nodes.reject{|node|
+      node['displayName'] == 'master' or
+      node['displayName'] == NODE_TEMPLATE_NAME or
+      node['displayName'].downcase.include?(DO_NOT_SCALE_NAME)}
+  end
+
   def self.get_node_names
     get_node_info["computer"].map{ |k,v| k['displayName'] }
   end
@@ -96,9 +105,9 @@ class Jenkins
   # Nodes in Jenkins list, that aren't connected, should be shutdown
   def self.remove_disconnected_nodes
     # get disconnected node names that are not the TEMPLATE node
-    all_nodes = get_node_info["computer"]
-    filter_nodes = all_nodes.reject{|k,v| !k['offline'] or k['displayName'] == NODE_TEMPLATE_NAME}
-    names = filter_nodes.map {|k,v| k['displayName']}
+    scalable_nodes = get_scalable_nodes
+    offline_nodes = scalable_nodes.select {|k| k['offline']}
+    names = offline_nodes.map {|k,v| k['displayName']}
     Jenkins.delete_nodes_from_jenkins!(names) unless names.empty?
   end
 

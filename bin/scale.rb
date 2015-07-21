@@ -29,33 +29,29 @@ def clean_up_disconnected_remote_servers
 end
 
 def scale_nodes()
-  node_info   = Jenkins.get_node_info
+  nodes = Jenkins.get_scalable_nodes
   build_queue = Jenkins.get_build_queue
   num_queued = build_queue["items"].count
-  master_node = node_info["computer"].select {|x| x['displayName'] == "master"}.first
-  master_executors = master_node["numExecutors"]
-  total_executors = node_info["totalExecutors"] - master_executors
-  # ugh, can't get a number of non master busy executors... so we will assume that 
-  # the master executors are always busy and do our best
-  busy_nodes = node_info["busyExecutors"] - master_executors
 
-  busy_nodes = 0 unless busy_nodes > 0
-  difference = total_executors - busy_nodes
+  num_nodes = nodes.count
+  num_busy_nodes = nodes.select {|k| !k['idle']}.count
+
+  difference = num_nodes - num_busy_nodes
   scale_by = 0
 
-  puts "total_executors: #{total_executors}"
-  puts "busy_nodes: #{busy_nodes}"
+  puts "total_nodes: #{num_nodes}"
+  puts "busy_nodes: #{num_busy_nodes}"
   puts "difference #{difference}"
   puts "queued jobs: #{num_queued}"
 
   if num_queued > 0 and num_queued > difference
     # don't go over the max count
-    scale_by = (total_executors + num_queued) <= MAX_NODES ? num_queued : MAX_NODES - total_executors
+    scale_by = (num_nodes + num_queued) <= MAX_NODES ? num_queued : MAX_NODES - num_nodes
   else # scale down, but by how much?
-    if (total_executors - difference) >= MIN_NODES
+    if (num_nodes - difference) >= MIN_NODES
       scale_by = -1 * difference
     else
-      scale_by = -1 * ( total_executors - MIN_NODES )
+      scale_by = -1 * ( num_nodes - MIN_NODES )
     end
   end
 
@@ -72,6 +68,6 @@ end
 check_environment
 if ARGV.any?{ |s| s!=~/pretend/ }
   clean_up_disconnected_remote_servers
+  Jenkins.remove_disconnected_nodes
 end
-Jenkins.remove_disconnected_nodes
 scale_nodes
