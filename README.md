@@ -27,3 +27,6 @@ __Recommended use:__ Have a startup script on your jenkins node that will
 3. Createing new nodes on jenkins (this can be done with jenkins-cli.jar)
 4. and executing this script.
 
+### Nodes to be ignored for scaling purposes
+
+Any node with a name containing DoNotMerge (case-insensitive) will be ignored by this script as it figures out how to scale
